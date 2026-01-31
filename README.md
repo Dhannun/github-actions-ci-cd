@@ -25,7 +25,28 @@ GitHub Repository
 
 ---
 
-## 1️⃣ Passwordless SSH Key (Recommended) 🔑
+## 1️⃣ GitHub Secrets 🔐
+
+Before running the workflow, you need to set the following **secrets** in your repository:
+
+| Secret Name | Description | Example / Notes |
+|------------|------------|----------------|
+| `SSH_PRIVATE_KEY` | Private SSH key used by GitHub Actions to connect to the server | The private key corresponding to the server's authorized key |
+| `SERVER_USER` | Username on the deployment server | `ubuntu`, `deploy`, etc. |
+| `SERVER_HOST` | Hostname or IP of the deployment server | `123.45.67.89` or `server.example.com` |
+| `SERVER_PASSWORD` | (Optional) Server password if you are using password-based SSH | Only needed if using SSH password fallback |
+
+**How to add secrets:**
+
+```
+GitHub → Repository → Settings → Secrets and Variables → Actions → New repository secret
+```
+
+> These secrets are never exposed in logs and are injected securely into the workflow as environment variables.
+
+---
+
+## 2️⃣ Passwordless SSH Key (Recommended) 🔑
 
 On the deployment server, create a dedicated SSH key:
 
@@ -57,7 +78,7 @@ git pull
 
 ---
 
-## 2️⃣ SSH with Password (Fallback) 🔒
+## 3️⃣ SSH with Password (Fallback) 🔒
 
 If you cannot use keys, you can connect with a password.  
 
@@ -72,7 +93,7 @@ sudo apt install -y sshpass
 Example usage in GitHub Actions:
 
 ```bash
-sshpass -p "SERVER_PASSWORD" ssh SERVER_USER@SERVER_HOST "
+sshpass -p "${{ secrets.SERVER_PASSWORD }}" ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "
     cd /PATH/TO/PROJECT &&
     git pull origin main &&
     sudo docker compose up -d --build &&
@@ -82,7 +103,7 @@ sshpass -p "SERVER_PASSWORD" ssh SERVER_USER@SERVER_HOST "
 
 ---
 
-## 3️⃣ Server → GitHub (Deploy Key) 🖥️
+## 4️⃣ Server → GitHub (Deploy Key) 🖥️
 
 On the server, generate a key specifically for GitHub access:
 
@@ -101,7 +122,7 @@ git pull
 
 ---
 
-## 4️⃣ GitHub Actions Workflow Example ⚡
+## 5️⃣ GitHub Actions Workflow Example ⚡
 
 ```yaml
 name: Deploy
@@ -136,7 +157,7 @@ jobs:
 
 ---
 
-## 5️⃣ Docker Sudo on Server 🐳
+## 6️⃣ Docker Sudo on Server 🐳
 
 Allow the deployment user to run Docker without a password:
 
@@ -152,7 +173,7 @@ SERVER_USER ALL=(ALL) NOPASSWD: /usr/bin/docker, /usr/bin/docker compose
 
 ---
 
-## 6️⃣ Logging & Verification 📊
+## 7️⃣ Logging & Verification 📊
 
 After deployment:
 
@@ -163,7 +184,7 @@ docker compose logs -f
 
 ---
 
-## 7️⃣ Security Notes 🔐
+## 8️⃣ Security Notes 🔐
 
 - Always prefer **SSH keys** over passwords  
 - Use a **dedicated deploy key** per server  
@@ -173,7 +194,7 @@ docker compose logs -f
 
 ---
 
-## 8️⃣ Summary 📝
+## 9️⃣ Summary 📝
 
 | Direction | Authentication |
 |------------|----------------|
